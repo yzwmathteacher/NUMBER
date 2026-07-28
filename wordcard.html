@@ -36,11 +36,32 @@
 </div>
 
 <script>
+    // 语音播报通用函数
+    function voiceSpeak(text) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "zh-CN";
+        utter.rate = 0.95;
+        utter.volume = 1;
+        window.speechSynthesis.speak(utter);
+    }
+
+    // 扩充惩罚库
     const punishList = [
-        "背诵一首古诗", "大声朗读课文一段", "做10个深蹲",
-        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
-        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
-        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语"
+        "背诵本学期必背古诗两首", "大声朗读整篇课文2遍", "抄写本课生字20遍",
+        "完整背诵一段文言文", "用5个本课成语造句子", "默写英语单词15个",
+        "上台讲解一道数学例题", "朗读英语对话3遍", "背诵课文重点段落",
+        "说出本节课3个知识点", "默写古诗全诗加注释", "朗读作文范文一段",
+        "给全班讲一个搞笑小故事", "模仿三种小动物叫声30秒",
+        "用三种不同语气朗读一句话", "上台做一分钟自我介绍",
+        "唱一句课本里的歌曲", "夸身边三位同学的优点",
+        "模仿老师讲课一分钟", "用方言读一段课文",
+        "猜一个全班都能听懂的谜语", "比一个可爱的表情包动作",
+        "分享一件今天开心的小事", "用夸张语气朗读词语",
+        "原地做15个深蹲", "开合跳20次", "高抬腿30秒",
+        "左右扭腰20下", "踮脚站立一分钟", "扩胸运动20次",
+        "单脚站立10秒左右脚轮换", "原地踏步一分钟",
+        "手臂绕环正反各15圈", "弯腰摸脚尖10次"
     ];
     function getRandomPunish(){
         return punishList[Math.floor(Math.random()*punishList.length)];
@@ -60,7 +81,10 @@
     const punishText = document.getElementById("punishText");
     const closePop = document.getElementById("closePop");
 
-    closePop.onclick = ()=>pop.style.display="none";
+    closePop.onclick = ()=>{
+        pop.style.display="none";
+        voiceSpeak("再来一局，集中注意力记忆单词");
+    };
 
     function initGame(){
         grid.innerHTML = "";
@@ -73,6 +97,7 @@
             temp.push({text:item.en,match:item.cn});
             temp.push({text:item.cn,match:item.en});
         })
+        // 洗牌
         for(let i=temp.length-1;i>0;i--){
             const r = Math.floor(Math.random()*(i+1));
             [temp[i],temp[r]] = [temp[r],temp[i]];
@@ -88,6 +113,7 @@
             grid.appendChild(div);
             cards.push(div);
         })
+        voiceSpeak("单词配对游戏开始，翻开卡片寻找对应中英文");
     }
     function clickCard(el){
         if(lock || el.classList.contains("open"))return;
@@ -100,23 +126,29 @@
             if(a.dataset.match === b.dataset.text){
                 matchCount++;
                 openCards = [];lock=false;
-                // 全部配对完成，无惩罚
-                if(matchCount >= wordPairs.length) return;
+                if(matchCount >= wordPairs.length){
+                    voiceSpeak("全部配对成功，太棒了！");
+                    return;
+                }
             }else{
                 setTimeout(()=>{
                     a.classList.remove("open");a.innerText="?";
                     b.classList.remove("open");b.innerText="?";
                     openCards=[];lock=false;
-                    // 连续多次失败触发惩罚
                     if(matchCount <= 2){
-                        punishText.innerText = getRandomPunish();
+                        const p = getRandomPunish();
+                        punishText.innerText = p;
                         pop.style.display = "flex";
+                        voiceSpeak(`配对失败，惩罚：${p}`);
                     }
                 },1000)
             }
         }
     }
-    resetBtn.onclick = initGame;
+    resetBtn.onclick = ()=>{
+        initGame();
+        voiceSpeak("重新开局");
+    };
     initGame();
 </script>
 </body>
