@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成语接龙游戏</title>
+    <style>
+        *{margin:0;padding:0;font-family:Microsoft Yahei}
+        body{background:#fff7e6;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+        .back{position:absolute;top:20px;left:20px;color:#d97706;font-size:16px;cursor:pointer}
+        .wrap{background:#fff;border-radius:20px;padding:32px;width:100%;max-width:480px;text-align:center;box-shadow:0 6px 24px #ffddb0}
+        h1{color:#d97706;margin-bottom:20px}
+        .last-word{font-size:30px;font-weight:bold;color:#b45309;margin:16px 0}
+        #userInput{width:80%;padding:14px;font-size:20px;border:2px solid #fdba74;border-radius:12px;outline:none;margin-bottom:16px}
+        .btns{display:flex;gap:12px;justify-content:center}
+        button{padding:12px 22px;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+        #check{background:#f97316;color:#fff}
+        #reset{background:#6b7280;color:#fff}
+        .msg{margin-top:18px;font-size:18px;height:26px;font-weight:500}
+        .ok{color:#059669}.fail{color:#dc2626}
+        .log{margin-top:20px;text-align:left;background:#fffbeb;padding:14px;border-radius:12px;max-height:220px;overflow-y:auto}
+        .pop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
+        .pop-box{background:#fff;padding:40px 30px;border-radius:16px;text-align:center;width:85%;max-width:360px}
+        .pop h2{color:#dc2626;margin-bottom:16px}
+        .pop p.punish{font-size:20px;color:#b91c1c;font-weight:bold;margin:15px 0}
+        .pop button{margin:8px;background:#f97316;color:white;border:none;padding:10px 16px;border-radius:8px}
+    </style>
+</head>
+<body>
+    <div class="back" onclick="location.href='index.html'">← 返回游戏首页</div>
+<div class="wrap">
+    <h1>成语接龙</h1>
+    <div>下一个成语首字必须是：</div>
+    <div class="last-word" id="targetChar">山</div>
+    <input id="userInput" placeholder="输入四字成语">
+    <div class="btns">
+        <button id="check">提交</button>
+        <button id="reset">重新开局</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div class="log" id="logBox">游戏记录：</div>
+</div>
+
+<div class="pop" id="popModal">
+    <div class="pop-box">
+        <h2>接龙失败！接受惩罚</h2>
+        <p class="punish">惩罚：<span id="punishText"></span></p>
+        <button id="closePop">继续接龙</button>
+        <button onclick="location.href='index.html'">返回首页</button>
+    </div>
+</div>
+
+<script>
+    const punishList = [
+        "背诵一首古诗", "大声朗读课文一段", "做10个深蹲",
+        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
+        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
+        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语"
+    ];
+    function getRandomPunish(){
+        return punishList[Math.floor(Math.random()*punishList.length)];
+    }
+
+    const idiomList = [
+        "山河万里","一帆风顺","四面楚歌","歌功颂德","德高望重","重见天日","日新月异","异想天开",
+        "开门见山","山清水秀","秀外慧中","中流砥柱","柱石之坚","坚不可摧","摧枯拉朽","朽木难雕",
+        "雕梁画栋","栋折榱崩","崩山裂地","地大物博","博学多才","才高八斗","斗转星移","移花接木"
+    ];
+    let targetChar = "";
+    const targetDom = document.getElementById("targetChar");
+    const input = document.getElementById("userInput");
+    const checkBtn = document.getElementById("check");
+    const resetBtn = document.getElementById("reset");
+    const msgDom = document.getElementById("msg");
+    const logBox = document.getElementById("logBox");
+    const pop = document.getElementById("popModal");
+    const punishText = document.getElementById("punishText");
+    const closePop = document.getElementById("closePop");
+
+    closePop.onclick = ()=>pop.style.display="none";
+
+    function startGame(){
+        msgDom.className = "msg";
+        msgDom.textContent = "";
+        input.value = "";
+        const first = idiomList[Math.floor(Math.random()*idiomList.length)];
+        targetChar = first[3];
+        targetDom.innerText = targetChar;
+        logBox.innerHTML = `游戏记录：<br>${first}`;
+    }
+    startGame();
+
+    checkBtn.onclick = ()=>{
+        const val = input.value.trim();
+        if(val.length!==4){
+            msgDom.innerText="请输入四字成语！";
+            msgDom.className="msg fail";
+            punishText.innerText = getRandomPunish();
+            pop.style.display = "flex";
+            return;
+        }
+        if(val[0]!==targetChar){
+            msgDom.innerText=`首字不对，需要以【${targetChar}】开头`;
+            msgDom.className="msg fail";
+            punishText.innerText = getRandomPunish();
+            pop.style.display = "flex";
+            return;
+        }
+        if(!idiomList.includes(val)){
+            msgDom.innerText="暂未收录该成语，换一个试试";
+            msgDom.className="msg fail";
+            punishText.innerText = getRandomPunish();
+            pop.style.display = "flex";
+            return;
+        }
+        msgDom.innerText="接龙成功！";
+        msgDom.className="msg ok";
+        logBox.innerHTML += `<br>${val}`;
+        targetChar = val[3];
+        targetDom.innerText = targetChar;
+        input.value = "";
+    }
+    resetBtn.onclick = startGame;
+    input.onkeydown = e=>e.key==="Enter"&&checkBtn.click();
+</script>
+</body>
+</html>
