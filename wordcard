@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词翻牌记忆</title>
+    <style>
+        *{margin:0;padding:0;font-family:Microsoft Yahei}
+        body{background:#f0fdf4;padding:20px}
+        .back{position:absolute;top:20px;left:20px;color:#047857;font-size:16px;cursor:pointer}
+        h1{text-align:center;color:#047857;margin-bottom:20px;margin-top:60px}
+        .grid{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+        .card{aspect-ratio:1/1;background:#059669;border-radius:10px;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;padding:6px;text-align:center}
+        .card.open{background:#fff;color:#111;border:2px solid #059669}
+        #reset{display:block;margin:20px auto;padding:12px 30px;background:#059669;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+        .pop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
+        .pop-box{background:#fff;padding:40px 30px;border-radius:16px;text-align:center;width:85%;max-width:360px}
+        .pop h2{color:#dc2626;margin-bottom:16px}
+        .pop p.punish{font-size:20px;color:#b91c1c;font-weight:bold;margin:15px 0}
+        .pop button{margin:8px;background:#059669;color:white;border:none;padding:10px 16px;border-radius:8px}
+    </style>
+</head>
+<body>
+    <div class="back" onclick="location.href='index.html'">← 返回游戏首页</div>
+    <h1>英语单词配对翻牌</h1>
+    <div class="grid" id="gridBox"></div>
+    <button id="reset">重新开始</button>
+
+<div class="pop" id="popModal">
+    <div class="pop-box">
+        <h2>本轮记忆失败！接受惩罚</h2>
+        <p class="punish">惩罚：<span id="punishText"></span></p>
+        <button id="closePop">再来一局</button>
+        <button onclick="location.href='index.html'">返回首页</button>
+    </div>
+</div>
+
+<script>
+    const punishList = [
+        "背诵一首古诗", "大声朗读课文一段", "做10个深蹲",
+        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
+        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
+        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语"
+    ];
+    function getRandomPunish(){
+        return punishList[Math.floor(Math.random()*punishList.length)];
+    }
+
+    const wordPairs = [
+        {en:"apple",cn:"苹果"},{en:"banana",cn:"香蕉"},{en:"cat",cn:"猫"},{en:"dog",cn:"狗"},
+        {en:"book",cn:"书本"},{en:"pen",cn:"钢笔"},{en:"sun",cn:"太阳"},{en:"moon",cn:"月亮"}
+    ]
+    let cards = [];
+    let openCards = [];
+    let lock = false;
+    let matchCount = 0;
+    const grid = document.getElementById("gridBox");
+    const resetBtn = document.getElementById("reset");
+    const pop = document.getElementById("popModal");
+    const punishText = document.getElementById("punishText");
+    const closePop = document.getElementById("closePop");
+
+    closePop.onclick = ()=>pop.style.display="none";
+
+    function initGame(){
+        grid.innerHTML = "";
+        cards = [];
+        openCards = [];
+        lock = false;
+        matchCount = 0;
+        const temp = [];
+        wordPairs.forEach(item=>{
+            temp.push({text:item.en,match:item.cn});
+            temp.push({text:item.cn,match:item.en});
+        })
+        for(let i=temp.length-1;i>0;i--){
+            const r = Math.floor(Math.random()*(i+1));
+            [temp[i],temp[r]] = [temp[r],temp[i]];
+        }
+        temp.forEach((item,idx)=>{
+            const div = document.createElement("div");
+            div.className = "card";
+            div.dataset.text = item.text;
+            div.dataset.match = item.match;
+            div.dataset.idx = idx;
+            div.innerText = "?";
+            div.onclick = ()=>clickCard(div);
+            grid.appendChild(div);
+            cards.push(div);
+        })
+    }
+    function clickCard(el){
+        if(lock || el.classList.contains("open"))return;
+        el.classList.add("open");
+        el.innerText = el.dataset.text;
+        openCards.push(el);
+        if(openCards.length === 2){
+            lock = true;
+            const a = openCards[0],b=openCards[1];
+            if(a.dataset.match === b.dataset.text){
+                matchCount++;
+                openCards = [];lock=false;
+                // 全部配对完成，无惩罚
+                if(matchCount >= wordPairs.length) return;
+            }else{
+                setTimeout(()=>{
+                    a.classList.remove("open");a.innerText="?";
+                    b.classList.remove("open");b.innerText="?";
+                    openCards=[];lock=false;
+                    // 连续多次失败触发惩罚
+                    if(matchCount <= 2){
+                        punishText.innerText = getRandomPunish();
+                        pop.style.display = "flex";
+                    }
+                },1000)
+            }
+        }
+    }
+    resetBtn.onclick = initGame;
+    initGame();
+</script>
+</body>
+</html>
