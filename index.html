@@ -1,6 +1,10 @@
-<html lang="zh-CN<head>
-   <meta charset="UTF-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-数字炸弹｜趣味惩罚小游戏<style>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字炸弹｜趣味惩罚小游戏</title>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -202,26 +206,45 @@
         @media (max-width: 400px) {
             .game-container { padding: 20px; }
             h1 { font-size: 22px; }
-       </style><body<div class="game-container">
-       <h1>💣 </h1<div class="mode-select">
-           <button class="mode-btn active" data-mode="family">👨‍👩‍👧</button><button class="mode-btn" data-mode="class">📚 课间学生</button>
-            <button class="mode-btn" data-mode="party">🎉</button></div>
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>💣 数字炸弹小游戏</h1>
 
-<div class="range-box" id="rangeShow">当前范围：1 ~</div<div class="tip-box" id="tipText">游戏加载完成！输入数字开始猜炸弹</div>
+        <div class="mode-select">
+            <button class="mode-btn active" data-mode="family">👨‍👩‍👧 家庭亲子</button>
+            <button class="mode-btn" data-mode="class">📚 课间学生</button>
+            <button class="mode-btn" data-mode="party">🎉 聚会娱乐</button>
+        </div>
 
-        <div class="input-wrap"><input type="number" id="numInput" placeholder="请输入数字<div class="btn-group">
-               <button class="game-btn" id="submitBtn"></button>
-<button class="game-btn" id="resetBtn</button></div>
-</div>
+        <div class="range-box" id="rangeShow">当前范围：1 ~ 100</div>
+        <div class="tip-box" id="tipText">游戏加载完成！输入数字开始猜炸弹</div>
 
-       <div class="stat-box<div><span id="countText">0</div>
-           <div>最佳步数：<span id="bestText</div</div></div>
+        <div class="input-wrap">
+            <input type="number" id="numInput" placeholder="请输入数字">
+            <div class="btn-group">
+                <button class="game-btn" id="submitBtn">提交猜测</button>
+                <button class="game-btn" id="resetBtn">重新开局</button>
+            </div>
+        </div>
 
-<div class="punish-modal" id="punishModal">
-        <div class="modal-content"><h2>💥 踩到炸弹！接受</h2>
-<div class="punish-text" id="pun</div>
-<button class="close-modal" id="closeModal">完成惩罚，下一局</button>
-        </div<script>
+        <div class="stat-box">
+            <div>猜测次数：<span id="countText">0</span></div>
+            <div>最佳步数：<span id="bestText">--</span></div>
+        </div>
+    </div>
+
+    <div class="punish-modal" id="punishModal">
+        <div class="modal-content">
+            <h2>💥 踩到炸弹！接受惩罚</h2>
+            <div class="punish-text" id="punishContent"></div>
+            <button class="close-modal" id="closeModal">完成惩罚，下一局</button>
+        </div>
+    </div>
+
+    <script>
         // 语音播报
         function speak(text) {
             const voice = new SpeechSynthesisUtterance(text);
@@ -333,7 +356,7 @@
             const guess = parseInt(val);
             guessTimes++;
 
-           < minNum || guess > maxNum) {
+            if(guess < minNum || guess > maxNum) {
                 const msg = `请输入${minNum}到${maxNum}之间的数字！`;
                 tipText.innerText = msg;
                 speak(msg);
@@ -348,7 +371,7 @@
                 document.querySelector(".game-container").classList.add("boom");
                 setTimeout(()=>document.querySelector(".game-container").classList.remove("boom"),500);
 
-                if(!best< bestRecord) bestRecord = guessTimes;
+                if(!bestRecord || guessTimes < bestRecord) bestRecord = guessTimes;
                 bestText.innerText = bestRecord;
 
                 const p = getPunish();
@@ -359,8 +382,8 @@
                 return;
             }
 
-            // 只更新范围、不报大小（你的核心要求）
-           < bombNum ? minNum = guess + 1 : maxNum = guess - 1;
+            // 只更新范围、不报大小（核心需求）
+            guess < bombNum ? minNum = guess + 1 : maxNum = guess - 1;
             const msg = `安全！当前数字范围：${minNum} 到 ${maxNum}`;
             tipText.innerText = msg;
             speak(msg);
@@ -378,5 +401,7 @@
         numInput.onkeydown = e => e.key === "Enter" && submitGuess();
 
         // 页面加载自动开局
-        initGame();</script>
+        initGame();
+    </script>
+</body>
 </html>
