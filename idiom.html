@@ -51,17 +51,39 @@
 </div>
 
 <script>
+    // ========== 语音播报通用函数 ==========
+    function voiceSpeak(text) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "zh-CN";
+        utter.rate = 0.95;
+        utter.volume = 1;
+        window.speechSynthesis.speak(utter);
+    }
+
+    // 扩充惩罚库
     const punishList = [
-        "背诵一首古诗", "大声朗读课文一段", "做10个深蹲",
-        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
-        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
-        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语"
+        "背诵本学期必背古诗两首", "大声朗读整篇课文2遍", "抄写本课生字20遍",
+        "完整背诵一段文言文", "用5个本课成语造句子", "默写英语单词15个",
+        "上台讲解一道数学例题", "朗读英语对话3遍", "背诵课文重点段落",
+        "说出本节课3个知识点", "默写古诗全诗加注释", "朗读作文范文一段",
+        "给全班讲一个搞笑小故事", "模仿三种小动物叫声30秒",
+        "用三种不同语气朗读一句话", "上台做一分钟自我介绍",
+        "唱一句课本里的歌曲", "夸身边三位同学的优点",
+        "模仿老师讲课一分钟", "用方言读一段课文",
+        "猜一个全班都能听懂的谜语", "比一个可爱的表情包动作",
+        "分享一件今天开心的小事", "用夸张语气朗读词语",
+        "原地做15个深蹲", "开合跳20次", "高抬腿30秒",
+        "左右扭腰20下", "踮脚站立一分钟", "扩胸运动20次",
+        "单脚站立10秒左右脚轮换", "原地踏步一分钟",
+        "手臂绕环正反各15圈", "弯腰摸脚尖10次"
     ];
     function getRandomPunish(){
         return punishList[Math.floor(Math.random()*punishList.length)];
     }
 
-    const idiomList = [
+    // 断网兜底备用成语库
+    const backupIdioms = [
         "山河万里","一帆风顺","四面楚歌","歌功颂德","德高望重","重见天日","日新月异","异想天开",
         "开门见山","山清水秀","秀外慧中","中流砥柱","柱石之坚","坚不可摧","摧枯拉朽","朽木难雕",
         "雕梁画栋","栋折榱崩","崩山裂地","地大物博","博学多才","才高八斗","斗转星移","移花接木"
@@ -77,40 +99,65 @@
     const punishText = document.getElementById("punishText");
     const closePop = document.getElementById("closePop");
 
-    closePop.onclick = ()=>pop.style.display="none";
+    closePop.onclick = ()=>{
+        pop.style.display="none";
+        voiceSpeak("继续游戏，请输入成语");
+    };
+
+    // 在线智能校验成语，任意四字成语识别
+    async function isIdiom(word) {
+        if(word.length !== 4) return false;
+        try {
+            const res = await fetch(`https://api.caijiasoft.com/api/chengyu?word=${encodeURIComponent(word)}`);
+            const json = await res.json();
+            if(json.code === 200 && json.data) return true;
+            return backupIdioms.includes(word);
+        } catch(err) {
+            console.log("网络异常，使用本地兜底成语库");
+            return backupIdioms.includes(word);
+        }
+    }
 
     function startGame(){
         msgDom.className = "msg";
         msgDom.textContent = "";
         input.value = "";
-        const first = idiomList[Math.floor(Math.random()*idiomList.length)];
+        const first = backupIdioms[Math.floor(Math.random()*backupIdioms.length)];
         targetChar = first[3];
         targetDom.innerText = targetChar;
         logBox.innerHTML = `游戏记录：<br>${first}`;
+        voiceSpeak(`游戏开始，请输入以${targetChar}开头的四字成语`);
     }
     startGame();
 
-    checkBtn.onclick = ()=>{
+    checkBtn.onclick = async ()=>{
         const val = input.value.trim();
         if(val.length!==4){
             msgDom.innerText="请输入四字成语！";
             msgDom.className="msg fail";
-            punishText.innerText = getRandomPunish();
+            const p = getRandomPunish();
+            punishText.innerText = p;
             pop.style.display = "flex";
+            voiceSpeak(`输入错误，惩罚：${p}`);
             return;
         }
         if(val[0]!==targetChar){
             msgDom.innerText=`首字不对，需要以【${targetChar}】开头`;
             msgDom.className="msg fail";
-            punishText.innerText = getRandomPunish();
+            const p = getRandomPunish();
+            punishText.innerText = p;
             pop.style.display = "flex";
+            voiceSpeak(`首字错误，必须以${targetChar}开头，惩罚：${p}`);
             return;
         }
-        if(!idiomList.includes(val)){
-            msgDom.innerText="暂未收录该成语，换一个试试";
+        const result = await isIdiom(val);
+        if(!result){
+            msgDom.innerText="该词语不是成语，请更换！";
             msgDom.className="msg fail";
-            punishText.innerText = getRandomPunish();
+            const p = getRandomPunish();
+            punishText.innerText = p;
             pop.style.display = "flex";
+            voiceSpeak(`这个不是成语，惩罚：${p}`);
             return;
         }
         msgDom.innerText="接龙成功！";
@@ -119,8 +166,12 @@
         targetChar = val[3];
         targetDom.innerText = targetChar;
         input.value = "";
+        voiceSpeak(`太棒了，下一个成语需要以${targetChar}开头`);
     }
-    resetBtn.onclick = startGame;
+    resetBtn.onclick = ()=>{
+        startGame();
+        voiceSpeak("已重新开局");
+    };
     input.onkeydown = e=>e.key==="Enter"&&checkBtn.click();
 </script>
 </body>
