@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字炸弹小游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #42a5f5, #64b5f6);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 35px 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        h1 {
+            color: #1976d2;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .range-text {
+            font-size: 20px;
+            color: #d84315;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+        .tip-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            min-height: 70px;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+        input {
+            width: 80%;
+            padding: 14px;
+            font-size: 20px;
+            border: 2px solid #90caf9;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        button {
+            padding: 13px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 0 6px;
+            transition: 0.2s;
+        }
+        #submitBtn {
+            background: #1976d2;
+            color: white;
+        }
+        #resetBtn {
+            background: #ef5350;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.85;
+        }
+        .count-info {
+            margin-top: 18px;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="game-box">
+    <h1>💣 数字炸弹游戏</h1>
+    <div class="range-text" id="rangeShow">当前范围：1 ~ 100</div>
+    <div class="tip-box" id="tipText">游戏开始！输入范围内数字猜炸弹</div>
+    <input type="number" id="numInput" placeholder="请输入数字">
+    <div>
+        <button id="submitBtn">提交猜测</button>
+        <button id="resetBtn">重新开局</button>
+    </div>
+    <div class="count-info" id="countText">猜测次数：0</div>
+</div>
+
+<script>
+    // 语音播报函数 浏览器内置TTS
+    function speak(text) {
+        const voice = new SpeechSynthesisUtterance(text);
+        voice.lang = "zh-CN";
+        voice.rate = 1;
+        speechSynthesis.speak(voice);
+    }
+
+    // 游戏全局变量
+    let minNum = 1;
+    let maxNum = 100;
+    let bombNum;
+    let guessTimes = 0;
+
+    // DOM元素
+    const rangeShow = document.getElementById("rangeShow");
+    const tipText = document.getElementById("tipText");
+    const numInput = document.getElementById("numInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const countText = document.getElementById("countText");
+
+    // 初始化游戏
+    function initGame() {
+        minNum = 1;
+        maxNum = 100;
+        bombNum = Math.floor(Math.random() * 100) + 1;
+        guessTimes = 0;
+        updateUI();
+        tipText.innerText = "新游戏开始！输入1到100之间的数字猜炸弹";
+        speak("欢迎来到数字炸弹游戏，炸弹范围是1到100");
+        numInput.value = "";
+    }
+
+    // 更新页面显示
+    function updateUI() {
+        rangeShow.innerText = `当前范围：${minNum} ~ ${maxNum}`;
+        countText.innerText = `猜测次数：${guessTimes}`;
+    }
+
+    // 提交猜测逻辑
+    function submitGuess() {
+        const val = numInput.value.trim();
+        if (val === "") {
+            tipText.innerText = "请输入数字！";
+            speak("请输入数字");
+            return;
+        }
+        const guess = parseInt(val);
+        guessTimes++;
+
+        // 超出当前区间
+        if (guess < minNum || guess > maxNum) {
+            const msg = `数字不在区间内，请输入${minNum}到${maxNum}之间的数字`;
+            tipText.innerText = msg;
+            speak(msg);
+            updateUI();
+            return;
+        }
+
+        // 踩中炸弹，游戏结束
+        if (guess === bombNum) {
+            const msg = `糟糕！你踩到炸弹了，一共猜了${guessTimes}次，嘣！爆炸`;
+            tipText.innerText = msg;
+            speak(msg);
+            submitBtn.disabled = true;
+            return;
+        }
+
+        // 没踩炸弹，更新区间，只播报新范围，不提示大小
+        if (guess < bombNum) {
+            minNum = guess + 1;
+        } else {
+            maxNum = guess - 1;
+        }
+        const msg = `安全，现在数字范围是${minNum}到${maxNum}`;
+        tipText.innerText = msg;
+        speak(msg);
+        updateUI();
+        numInput.value = "";
+    }
+
+    // 绑定按钮事件
+    submitBtn.addEventListener("click", submitGuess);
+    resetBtn.addEventListener("click", () => {
+        submitBtn.disabled = false;
+        initGame();
+    });
+    // 回车快速提交
+    numInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") submitGuess();
+    })
+
+    // 页面加载自动开局
+    window.onload = initGame;
+</script>
+</body>
+</html>
