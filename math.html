@@ -62,11 +62,32 @@
 </div>
 
 <script>
+    // 语音播报通用函数
+    function voiceSpeak(text) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "zh-CN";
+        utter.rate = 0.95;
+        utter.volume = 1;
+        window.speechSynthesis.speak(utter);
+    }
+
+    // 扩充惩罚库
     const punishList = [
-        "背诵一首古诗", "大声朗读课文一段", "做10个深蹲",
-        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
-        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
-        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语"
+        "背诵本学期必背古诗两首", "大声朗读整篇课文2遍", "抄写本课生字20遍",
+        "完整背诵一段文言文", "用5个本课成语造句子", "默写英语单词15个",
+        "上台讲解一道数学例题", "朗读英语对话3遍", "背诵课文重点段落",
+        "说出本节课3个知识点", "默写古诗全诗加注释", "朗读作文范文一段",
+        "给全班讲一个搞笑小故事", "模仿三种小动物叫声30秒",
+        "用三种不同语气朗读一句话", "上台做一分钟自我介绍",
+        "唱一句课本里的歌曲", "夸身边三位同学的优点",
+        "模仿老师讲课一分钟", "用方言读一段课文",
+        "猜一个全班都能听懂的谜语", "比一个可爱的表情包动作",
+        "分享一件今天开心的小事", "用夸张语气朗读词语",
+        "原地做15个深蹲", "开合跳20次", "高抬腿30秒",
+        "左右扭腰20下", "踮脚站立一分钟", "扩胸运动20次",
+        "单脚站立10秒左右脚轮换", "原地踏步一分钟",
+        "手臂绕环正反各15圈", "弯腰摸脚尖10次"
     ];
     function getRandomPunish(){
         return punishList[Math.floor(Math.random()*punishList.length)];
@@ -88,7 +109,10 @@
     let a,b,realAns;
     let correct = 0, error = 0;
 
-    closePop.onclick = ()=>pop.style.display="none";
+    closePop.onclick = ()=>{
+        pop.style.display="none";
+        voiceSpeak("继续答题");
+    };
 
     typeBtns.forEach(btn=>{
         btn.onclick = ()=>{
@@ -96,6 +120,7 @@
             btn.classList.add("active");
             calcType = btn.dataset.type;
             createQuestion();
+            voiceSpeak(`切换为${btn.innerText}题型`);
         }
     })
 
@@ -107,43 +132,57 @@
             b = Math.floor(Math.random()*50)+1;
             realAns = a+b;
             question.innerText = `${a} + ${b} = ?`;
+            voiceSpeak(`${a}加${b}等于几`);
         }else if(calcType === "sub"){
             a = Math.floor(Math.random()*50)+10;
             b = Math.floor(Math.random()*a);
             realAns = a-b;
             question.innerText = `${a} - ${b} = ?`;
+            voiceSpeak(`${a}减${b}等于几`);
         }else if(calcType === "mul"){
             a = Math.floor(Math.random()*12)+1;
             b = Math.floor(Math.random()*12)+1;
             realAns = a*b;
             question.innerText = `${a} × ${b} = ?`;
+            voiceSpeak(`${a}乘${b}等于几`);
         }else{
             const r = Math.random();
             if(r<0.33){
                 a = Math.floor(Math.random()*50)+1;b=Math.floor(Math.random()*50)+1;realAns=a+b;question.innerText = `${a} + ${b} = ?`;
+                voiceSpeak(`${a}加${b}等于几`);
             }else if(r<0.66){
                 a = Math.floor(Math.random()*50)+10;b=Math.floor(Math.random()*a);realAns=a-b;question.innerText = `${a} - ${b} = ?`;
+                voiceSpeak(`${a}减${b}等于几`);
             }else{
                 a = Math.floor(Math.random()*12)+1;b=Math.floor(Math.random()*12)+1;realAns=a*b;question.innerText = `${a} × ${b} = ?`;
+                voiceSpeak(`${a}乘${b}等于几`);
             }
         }
     }
 
     submit.onclick = ()=>{
         const user = Number(input.value);
-        if(isNaN(user)){tip.innerText="请输入数字";tip.className="tip wrong";return}
+        if(isNaN(user)){
+            tip.innerText="请输入数字";
+            tip.className="tip wrong";
+            voiceSpeak("请输入有效数字答案");
+            return
+        }
         if(user === realAns){
             correct++;
             correctDom.innerText = correct;
             tip.innerText="回答正确！";
             tip.className="tip right";
+            voiceSpeak("太棒了，回答正确！");
         }else{
             error++;
             errorDom.innerText = error;
             tip.innerText=`答错啦，正确答案：${realAns}`;
             tip.className="tip wrong";
-            punishText.innerText = getRandomPunish();
+            const p = getRandomPunish();
+            punishText.innerText = p;
             pop.style.display = "flex";
+            voiceSpeak(`回答错误，惩罚：${p}`);
         }
     }
     nextBtn.onclick = createQuestion;
