@@ -56,12 +56,32 @@
     </div>
 
 <script>
-    // 课堂惩罚库
+    // 语音播报通用函数
+    function voiceSpeak(text) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "zh-CN";
+        utter.rate = 0.95;
+        utter.volume = 1;
+        window.speechSynthesis.speak(utter);
+    }
+
+    // 扩充惩罚库
     const punishList = [
-        "背诵三首古诗", "大声朗读课文一段", "做30个深蹲",
-        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
-        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
-        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语","扭腰30秒","大笑30秒","模仿老师"
+        "背诵本学期必背古诗两首", "大声朗读整篇课文2遍", "抄写本课生字20遍",
+        "完整背诵一段文言文", "用5个本课成语造句子", "默写英语单词15个",
+        "上台讲解一道数学例题", "朗读英语对话3遍", "背诵课文重点段落",
+        "说出本节课3个知识点", "默写古诗全诗加注释", "朗读作文范文一段",
+        "给全班讲一个搞笑小故事", "模仿三种小动物叫声30秒",
+        "用三种不同语气朗读一句话", "上台做一分钟自我介绍",
+        "唱一句课本里的歌曲", "夸身边三位同学的优点",
+        "模仿老师讲课一分钟", "用方言读一段课文",
+        "猜一个全班都能听懂的谜语", "比一个可爱的表情包动作",
+        "分享一件今天开心的小事", "用夸张语气朗读词语",
+        "原地做15个深蹲", "开合跳20次", "高抬腿30秒",
+        "左右扭腰20下", "踮脚站立一分钟", "扩胸运动20次",
+        "单脚站立10秒左右脚轮换", "原地踏步一分钟",
+        "手臂绕环正反各15圈", "弯腰摸脚尖10次"
     ];
     function getRandomPunish(){
         return punishList[Math.floor(Math.random()*punishList.length)];
@@ -86,11 +106,16 @@
     function newBomb(){
         minNum = Number(minSet.value);
         maxNum = Number(maxSet.value);
-        if(minNum >= maxNum){alert("最小值必须小于最大值");return}
+        if(minNum >= maxNum){
+            alert("最小值必须小于最大值");
+            voiceSpeak("输入错误，最小值不能大于等于最大值");
+            return;
+        }
         bomb = Math.floor(Math.random()*(maxNum-minNum+1)) + minNum;
         guessCount = 0;
         countDom.innerText = 0;
         rangeText.innerText = `当前范围：${minNum} ~ ${maxNum}`;
+        voiceSpeak(`新游戏开始，数字范围${minNum}到${maxNum}`);
         input.value = "";
         pop.style.display = "none";
     }
@@ -102,20 +127,26 @@
         const val = Number(input.value);
         if(isNaN(val) || val<minNum || val>maxNum){
             alert(`请输入${minNum}到${maxNum}之间的数字`);
+            voiceSpeak(`请输入${minNum}到${maxNum}区间内的数字`);
             return;
         }
         guessCount++;
         countDom.innerText = guessCount;
         if(val === bomb){
+            const p = getRandomPunish();
             bombTip.innerText = `本轮一共猜了${guessCount}次`;
-            punishText.innerText = getRandomPunish();
+            punishText.innerText = p;
             pop.style.display = "flex";
+            voiceSpeak(`爆炸！踩到炸弹，惩罚：${p}`);
         }else if(val < bomb){
             minNum = val + 1;
+            rangeText.innerText = `当前范围：${minNum} ~ ${maxNum}`;
+            voiceSpeak(`猜小了，现在范围是${minNum}到${maxNum}`);
         }else{
             maxNum = val - 1;
+            rangeText.innerText = `当前范围：${minNum} ~ ${maxNum}`;
+            voiceSpeak(`猜大了，现在范围是${minNum}到${maxNum}`);
         }
-        rangeText.innerText = `当前范围：${minNum} ~ ${maxNum}`;
         input.value = "";
     }
     input.onkeydown = e=>e.key==="Enter"&&submit.click();
