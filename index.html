@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数字炸弹｜趣味惩罚小游戏</title>
+    <title>课堂互动小游戏合集</title>
     <style>
         * {
             margin: 0;
@@ -11,397 +11,85 @@
             box-sizing: border-box;
             font-family: "Microsoft Yahei", sans-serif;
         }
-
         body {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #4F46E5, #818CF8);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
-
-        .game-container {
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 30px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            text-align: center;
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
         }
-
         h1 {
-            color: #4f46e5;
-            font-size: 26px;
-            margin-bottom: 15px;
-        }
-
-        .mode-select {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-
-        .mode-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 2px solid #e0e0e0;
-            background: #f8f9fa;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .mode-btn.active {
-            background: #4f46e5;
-            color: #fff;
-            border-color: #4f46e5;
-        }
-
-        .range-box {
-            background: #fef3f2;
-            color: #dc2626;
-            font-size: 22px;
-            font-weight: bold;
-            padding: 12px;
-            border-radius: 12px;
-            margin: 15px 0;
-        }
-
-        .tip-box {
-            background: #f5f7ff;
-            padding: 18px;
-            border-radius: 12px;
-            min-height: 80px;
-            font-size: 16px;
-            color: #333;
-            line-height: 1.7;
-            margin: 15px 0;
-        }
-
-        .punish-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-        }
-
-        .modal-content {
-            background: #fff;
-            padding: 40px 30px;
-            border-radius: 20px;
             text-align: center;
-            width: 90%;
-            max-width: 380px;
-            animation: pop 0.4s ease;
-        }
-
-        @keyframes pop {
-            0% {transform: scale(0.5); opacity: 0;}
-            100% {transform: scale(1); opacity: 1;}
-        }
-
-        .modal-content h2 {
-            color: #dc2626;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-        .punish-text {
-            font-size: 18px;
-            color: #333;
-            line-height: 1.8;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
-
-        .close-modal {
-            padding: 10px 25px;
-            background: #4f46e5;
             color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
+            font-size: 36px;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
         }
-
-        .input-wrap {
-            margin: 20px 0;
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
         }
-
-        #numInput {
-            width: 85%;
-            padding: 15px;
-            font-size: 22px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
+        .game-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 20px;
             text-align: center;
-            outline: none;
-        }
-
-        #numInput:focus {
-            border-color: #4f46e5;
-        }
-
-        .btn-group {
-            margin-top: 18px;
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-
-        .game-btn {
-            padding: 12px 28px;
-            font-size: 16px;
-            border: none;
-            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
             cursor: pointer;
+            transition: all 0.25s ease;
         }
-
-        #submitBtn {
-            background: #4f46e5;
-            color: #fff;
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
         }
-
-        #resetBtn {
-            background: #f87171;
-            color: #fff;
+        .icon {
+            font-size: 50px;
+            margin-bottom: 16px;
         }
-
-        .game-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .game-card h2 {
+            font-size: 22px;
+            color: #1E293B;
+            margin-bottom: 10px;
         }
-
-        .stat-box {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #666;
+        .game-card p {
+            color: #64748B;
             font-size: 15px;
-        }
-
-        .boom {
-            animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%,100% {transform: translateX(0);}
-            25% {transform: translateX(-8px);}
-            75% {transform: translateX(8px);}
-        }
-
-        @media (max-width: 400px) {
-            .game-container { padding: 20px; }
-            h1 { font-size: 22px; }
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>💣 数字炸弹小游戏</h1>
-
-        <div class="mode-select">
-            <button class="mode-btn active" data-mode="family">👨‍👩‍👧 家庭亲子</button>
-            <button class="mode-btn" data-mode="class">📚 课间学生</button>
-            <button class="mode-btn" data-mode="party">🎉 聚会娱乐</button>
-        </div>
-
-        <div class="range-box" id="rangeShow">当前范围：1 ~ 100</div>
-        <div class="tip-box" id="tipText">游戏加载完成！输入数字开始猜炸弹</div>
-
-        <div class="input-wrap">
-            <input type="number" id="numInput" placeholder="请输入数字">
-            <div class="btn-group">
-                <button class="game-btn" id="submitBtn">提交猜测</button>
-                <button class="game-btn" id="resetBtn">重新开局</button>
+    <div class="container">
+        <h1>📚 课堂互动游戏合集</h1>
+        <div class="game-grid">
+            <!-- 数字炸弹 -->
+            <div class="game-card" onclick="location.href='bomb.html'">
+                <div class="icon">💣</div>
+                <h2>数字炸弹</h2>
+                <p>多人课堂猜数字，只缩小范围不提示大小，内置惩罚机制，自定义数字区间</p>
+            </div>
+            <!-- 口算闯关 -->
+            <div class="game-card" onclick="location.href='math.html'">
+                <div class="icon">🔢</div>
+                <h2>口算闯关练习</h2>
+                <p>加减乘混合口算，自动判题计分，适合小学生日常计算训练</p>
+            </div>
+            <!-- 成语接龙 -->
+            <div class="game-card" onclick="location.href='idiom.html'">
+                <div class="icon">📜</div>
+                <h2>成语接龙</h2>
+                <p>语文课堂互动，四字成语接龙，自动校验首字，记录接龙历史</p>
+            </div>
+            <!-- 单词翻牌 -->
+            <div class="game-card" onclick="location.href='wordcard.html'">
+                <div class="icon">🔤</div>
+                <h2>单词配对翻牌</h2>
+                <p>中英单词记忆配对小游戏，锻炼英语单词记忆能力</p>
             </div>
         </div>
-
-        <div class="stat-box">
-            <div>猜测次数：<span id="countText">0</span></div>
-            <div>最佳步数：<span id="bestText">--</span></div>
-        </div>
     </div>
-
-    <div class="punish-modal" id="punishModal">
-        <div class="modal-content">
-            <h2>💥 踩到炸弹！接受惩罚</h2>
-            <div class="punish-text" id="punishContent"></div>
-            <button class="close-modal" id="closeModal">完成惩罚，下一局</button>
-        </div>
-    </div>
-
-    <script>
-        // 语音播报
-        function speak(text) {
-            const voice = new SpeechSynthesisUtterance(text);
-            voice.lang = "zh-CN";
-            voice.rate = 1.05;
-            speechSynthesis.speak(voice);
-        }
-
-        // 三套惩罚库
-        const punishList = {
-            family: [
-                "大声朗读一首古诗",
-                "给家人唱一首儿歌",
-                "做10个深蹲",
-                "帮家人捶背1分钟",
-                "大声说出3个家人的优点",
-                "原地踏步30秒自我介绍",
-                "背诵乘法口诀",
-                "做5个开合跳",
-                "讲一个小笑话",
-                "静坐1分钟调整状态"
-            ],
-            class: [
-                "背诵一句名人名言",
-                "朗读一段课文",
-                "深呼吸放松身心",
-                "说出3个学习小目标",
-                "手臂拉伸30秒",
-                "分享一件开心小事",
-                "背诵一首古诗",
-                "端正坐姿静坐一分钟",
-                "说出自己的一个优点",
-                "整理桌面书本"
-            ],
-            party: [
-                "模仿小动物走路10秒",
-                "夸张语气自我介绍",
-                "给所有人比心",
-                "唱一句熟悉的歌曲",
-                "做可爱鬼脸",
-                "说出三位在场人的优点",
-                "原地转圈站稳",
-                "用方言说祝福语",
-                "模仿机器人说话",
-                "向大家鞠躬问好"
-            ]
-        };
-
-        // 游戏变量
-        let minNum = 1, maxNum = 100, bombNum = 0;
-        let guessTimes = 0, bestRecord = null;
-        let gameMode = "family";
-
-        // DOM
-        const rangeShow = document.getElementById("rangeShow");
-        const tipText = document.getElementById("tipText");
-        const numInput = document.getElementById("numInput");
-        const submitBtn = document.getElementById("submitBtn");
-        const resetBtn = document.getElementById("resetBtn");
-        const countText = document.getElementById("countText");
-        const bestText = document.getElementById("bestText");
-        const punishModal = document.getElementById("punishModal");
-        const punishContent = document.getElementById("punishContent");
-        const closeModal = document.getElementById("closeModal");
-        const modeBtns = document.querySelectorAll(".mode-btn");
-
-        // 切换模式
-        modeBtns.forEach(btn => {
-            btn.onclick = () => {
-                modeBtns.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                gameMode = btn.dataset.mode;
-                speak("已切换" + btn.innerText + "模式");
-            }
-        });
-
-        // 初始化游戏
-        function initGame() {
-            minNum = 1; maxNum = 100;
-            bombNum = Math.floor(Math.random() * 100) + 1;
-            guessTimes = 0;
-            submitBtn.disabled = false;
-            numInput.value = "";
-            tipText.innerText = "新局开始！输入数字猜测炸弹位置";
-            updateUI();
-            speak("新游戏开始，数字范围1到100");
-        }
-
-        function updateUI() {
-            rangeShow.innerText = `当前范围：${minNum} ~ ${maxNum}`;
-            countText.innerText = guessTimes;
-            if(bestRecord) bestText.innerText = bestRecord;
-        }
-
-        function getPunish() {
-            const arr = punishList[gameMode];
-            return arr[Math.floor(Math.random() * arr.length)];
-        }
-
-        // 提交猜测
-        function submitGuess() {
-            const val = numInput.value.trim();
-            if(!val) {
-                tipText.innerText = "请输入有效数字！";
-                speak("请输入有效数字");
-                return;
-            }
-
-            const guess = parseInt(val);
-            guessTimes++;
-
-            if(guess < minNum || guess > maxNum) {
-                const msg = `请输入${minNum}到${maxNum}之间的数字！`;
-                tipText.innerText = msg;
-                speak(msg);
-                numInput.value = "";
-                return;
-            }
-
-            // 踩炸弹
-            if(guess === bombNum) {
-                tipText.innerText = `踩中炸弹！共猜测${guessTimes}次`;
-                speak("糟糕，踩到炸弹了，接受惩罚！");
-                document.querySelector(".game-container").classList.add("boom");
-                setTimeout(()=>document.querySelector(".game-container").classList.remove("boom"),500);
-
-                if(!bestRecord || guessTimes < bestRecord) bestRecord = guessTimes;
-                bestText.innerText = bestRecord;
-
-                const p = getPunish();
-                punishContent.innerText = p;
-                speak("惩罚内容：" + p);
-                punishModal.style.display = "flex";
-                submitBtn.disabled = true;
-                return;
-            }
-
-            // 只更新范围、不报大小（核心需求）
-            guess < bombNum ? minNum = guess + 1 : maxNum = guess - 1;
-            const msg = `安全！当前数字范围：${minNum} 到 ${maxNum}`;
-            tipText.innerText = msg;
-            speak(msg);
-            updateUI();
-            numInput.value = "";
-        }
-
-        closeModal.onclick = () => {
-            punishModal.style.display = "none";
-            initGame();
-        }
-
-        submitBtn.onclick = submitGuess;
-        resetBtn.onclick = initGame;
-        numInput.onkeydown = e => e.key === "Enter" && submitGuess();
-
-        // 页面加载自动开局
-        initGame();
-    </script>
 </body>
 </html>
