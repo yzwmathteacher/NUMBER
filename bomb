@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字炸弹</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Microsoft Yahei}
+        body{background:#1e293b;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:15px}
+        .back{position:absolute;top:20px;left:20px;color:#fff;font-size:16px;cursor:pointer}
+        .card{background:#fff;border-radius:22px;padding:30px;width:100%;max-width:460px;text-align:center}
+        h1{color:#dc2626;margin-bottom:18px}
+        .set-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+        .set-row input{width:100px;padding:10px;font-size:18px;text-align:center;border:1px solid #ccc;border-radius:8px}
+        #setRange{background:#2563eb;color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer}
+        .range-show{font-size:24px;color:#1e293b;font-weight:bold;margin:20px 0;background:#fee2e2;padding:12px;border-radius:12px}
+        #numInput{width:75%;padding:14px;font-size:22px;text-align:center;border:2px solid #94a3b8;border-radius:12px;margin-bottom:14px}
+        .btn-group{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+        button{padding:12px 20px;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+        #submit{background:#22c55e;color:white}
+        #restart{background:#64748b;color:white}
+        .pop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
+        .pop-box{background:#fff;padding:40px 30px;border-radius:16px;text-align:center;width:85%;max-width:360px}
+        .pop h2{color:#dc2626;margin-bottom:16px}
+        .pop p.punish{font-size:20px;color:#b91c1c;font-weight:bold;margin:15px 0;line-height:1.6}
+        .pop button{background:#2563eb;color:white;margin:10px 8px}
+    </style>
+</head>
+<body>
+    <div class="back" onclick="location.href='index.html'">← 返回游戏首页</div>
+    <div class="card">
+        <h1>💣 数字炸弹（自定义区间）</h1>
+        <div class="set-row">
+            <input type="number" id="minSet" value="1">
+            <span>~</span>
+            <input type="number" id="maxSet" value="100">
+            <button id="setRange">确认区间</button>
+        </div>
+        <div class="range-show" id="rangeText">当前范围：1 ~ 100</div>
+        <input type="number" id="numInput" placeholder="输入猜测数字">
+        <div class="btn-group">
+            <button id="submit">提交猜测</button>
+            <button id="restart">重置炸弹</button>
+        </div>
+        <div>猜测次数：<span id="count">0</span></div>
+    </div>
+
+    <div class="pop" id="popModal">
+        <div class="pop-box">
+            <h2>爆炸！踩到炸弹了！</h2>
+            <p id="bombTip">本轮一共猜了0次</p>
+            <p class="punish">惩罚：<span id="punishText"></span></p>
+            <button id="nextRound">下一局</button>
+            <button onclick="location.href='index.html'">返回首页</button>
+        </div>
+    </div>
+
+<script>
+    // 课堂惩罚库
+    const punishList = [
+        "背诵三首古诗", "大声朗读课文一段", "做30个深蹲",
+        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
+        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
+        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语","扭腰30秒","大笑30秒","模仿老师"
+    ];
+    function getRandomPunish(){
+        return punishList[Math.floor(Math.random()*punishList.length)];
+    }
+
+    const minSet = document.getElementById("minSet");
+    const maxSet = document.getElementById("maxSet");
+    const setBtn = document.getElementById("setRange");
+    const rangeText = document.getElementById("rangeText");
+    const input = document.getElementById("numInput");
+    const submit = document.getElementById("submit");
+    const restart = document.getElementById("restart");
+    const countDom = document.getElementById("count");
+    const pop = document.getElementById("popModal");
+    const bombTip = document.getElementById("bombTip");
+    const punishText = document.getElementById("punishText");
+    const nextRound = document.getElementById("nextRound");
+
+    let minNum = 1, maxNum = 100;
+    let bomb = 0, guessCount = 0;
+
+    function newBomb(){
+        minNum = Number(minSet.value);
+        maxNum = Number(maxSet.value);
+        if(minNum >= maxNum){alert("最小值必须小于最大值");return}
+        bomb = Math.floor(Math.random()*(maxNum-minNum+1)) + minNum;
+        guessCount = 0;
+        countDom.innerText = 0;
+        rangeText.innerText = `当前范围：${minNum} ~ ${maxNum}`;
+        input.value = "";
+        pop.style.display = "none";
+    }
+    setBtn.onclick = newBomb;
+    restart.onclick = newBomb;
+    nextRound.onclick = newBomb;
+
+    submit.onclick = ()=>{
+        const val = Number(input.value);
+        if(isNaN(val) || val<minNum || val>maxNum){
+            alert(`请输入${minNum}到${maxNum}之间的数字`);
+            return;
+        }
+        guessCount++;
+        countDom.innerText = guessCount;
+        if(val === bomb){
+            bombTip.innerText = `本轮一共猜了${guessCount}次`;
+            punishText.innerText = getRandomPunish();
+            pop.style.display = "flex";
+        }else if(val < bomb){
+            minNum = val + 1;
+        }else{
+            maxNum = val - 1;
+        }
+        rangeText.innerText = `当前范围：${minNum} ~ ${maxNum}`;
+        input.value = "";
+    }
+    input.onkeydown = e=>e.key==="Enter"&&submit.click();
+    newBomb();
+</script>
+</body>
+</html>
