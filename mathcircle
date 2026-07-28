@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学数学口算闯关</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;font-family:Microsoft Yahei}
+        body{background:#e8f4ff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:15px}
+        .back{position:absolute;top:20px;left:20px;color:#2563eb;font-size:16px;cursor:pointer}
+        .box{background:#fff;border-radius:20px;padding:30px;width:100%;max-width:460px;box-shadow:0 4px 20px #b8d8f5;text-align:center}
+        h1{color:#2563eb;margin-bottom:20px;font-size:26px}
+        .type-box{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+        .type-btn{padding:8px 14px;border:none;border-radius:30px;background:#dbeafe;color:#2563eb;cursor:pointer}
+        .type-btn.active{background:#2563eb;color:white}
+        .q-area{font-size:42px;font-weight:bold;margin:30px 0;color:#111827}
+        #answer{width:70%;padding:14px;font-size:24px;text-align:center;border:2px solid #cbd5e1;border-radius:12px;outline:none;margin-bottom:16px}
+        .btn-row{display:flex;gap:12px;justify-content:center}
+        button{padding:12px 24px;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+        #submit{background:#2563eb;color:white}
+        #next{background:#10b981;color:white}
+        .info{margin-top:24px;color:#475569;font-size:15px}
+        .tip{margin-top:12px;font-size:16px;height:24px;font-weight:bold}
+        .right{color:#16a34a}.wrong{color:#dc2626}
+        .pop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
+        .pop-box{background:#fff;padding:40px 30px;border-radius:16px;text-align:center;width:85%;max-width:360px}
+        .pop h2{color:#dc2626;margin-bottom:16px}
+        .pop p.punish{font-size:20px;color:#b91c1c;font-weight:bold;margin:15px 0}
+        .pop button{margin:8px;background:#2563eb;color:white;border:none;padding:10px 16px;border-radius:8px}
+    </style>
+</head>
+<body>
+    <div class="back" onclick="location.href='index.html'">← 返回游戏首页</div>
+<div class="box">
+    <h1>口算闯关练习</h1>
+    <div class="type-box">
+        <button class="type-btn active" data-type="add">加法</button>
+        <button class="type-btn" data-type="sub">减法</button>
+        <button class="type-btn" data-type="mul">乘法</button>
+        <button class="type-btn" data-type="mix">混合</button>
+    </div>
+    <div class="q-area" id="question">0 + 0 = ?</div>
+    <input type="number" id="answer" placeholder="输入答案">
+    <div class="btn-row">
+        <button id="submit">提交答案</button>
+        <button id="next">下一题</button>
+    </div>
+    <div class="tip" id="tip"></div>
+    <div class="info">
+        答对：<span id="correct">0</span> 道 &nbsp;&nbsp;
+        答错：<span id="error">0</span> 道
+    </div>
+</div>
+
+<div class="pop" id="popModal">
+    <div class="pop-box">
+        <h2>回答错误！接受惩罚</h2>
+        <p class="punish">惩罚：<span id="punishText"></span></p>
+        <button id="closePop">继续做题</button>
+        <button onclick="location.href='index.html'">返回首页</button>
+    </div>
+</div>
+
+<script>
+    const punishList = [
+        "背诵一首古诗", "大声朗读课文一段", "做10个深蹲",
+        "唱一句课本歌曲", "给大家讲一个小笑话", "抄写生字10遍",
+        "回答老师一道随机难题", "模仿小动物30秒", "用三种语气读句子",
+        "上台自我介绍一分钟", "做5道口算练习题", "说出3个成语"
+    ];
+    function getRandomPunish(){
+        return punishList[Math.floor(Math.random()*punishList.length)];
+    }
+
+    const typeBtns = document.querySelectorAll(".type-btn");
+    const question = document.getElementById("question");
+    const input = document.getElementById("answer");
+    const submit = document.getElementById("submit");
+    const nextBtn = document.getElementById("next");
+    const tip = document.getElementById("tip");
+    const correctDom = document.getElementById("correct");
+    const errorDom = document.getElementById("error");
+    const pop = document.getElementById("popModal");
+    const punishText = document.getElementById("punishText");
+    const closePop = document.getElementById("closePop");
+
+    let calcType = "add";
+    let a,b,realAns;
+    let correct = 0, error = 0;
+
+    closePop.onclick = ()=>pop.style.display="none";
+
+    typeBtns.forEach(btn=>{
+        btn.onclick = ()=>{
+            typeBtns.forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            calcType = btn.dataset.type;
+            createQuestion();
+        }
+    })
+
+    function createQuestion(){
+        tip.textContent = "";
+        input.value = "";
+        if(calcType === "add"){
+            a = Math.floor(Math.random()*50)+1;
+            b = Math.floor(Math.random()*50)+1;
+            realAns = a+b;
+            question.innerText = `${a} + ${b} = ?`;
+        }else if(calcType === "sub"){
+            a = Math.floor(Math.random()*50)+10;
+            b = Math.floor(Math.random()*a);
+            realAns = a-b;
+            question.innerText = `${a} - ${b} = ?`;
+        }else if(calcType === "mul"){
+            a = Math.floor(Math.random()*12)+1;
+            b = Math.floor(Math.random()*12)+1;
+            realAns = a*b;
+            question.innerText = `${a} × ${b} = ?`;
+        }else{
+            const r = Math.random();
+            if(r<0.33){
+                a = Math.floor(Math.random()*50)+1;b=Math.floor(Math.random()*50)+1;realAns=a+b;question.innerText = `${a} + ${b} = ?`;
+            }else if(r<0.66){
+                a = Math.floor(Math.random()*50)+10;b=Math.floor(Math.random()*a);realAns=a-b;question.innerText = `${a} - ${b} = ?`;
+            }else{
+                a = Math.floor(Math.random()*12)+1;b=Math.floor(Math.random()*12)+1;realAns=a*b;question.innerText = `${a} × ${b} = ?`;
+            }
+        }
+    }
+
+    submit.onclick = ()=>{
+        const user = Number(input.value);
+        if(isNaN(user)){tip.innerText="请输入数字";tip.className="tip wrong";return}
+        if(user === realAns){
+            correct++;
+            correctDom.innerText = correct;
+            tip.innerText="回答正确！";
+            tip.className="tip right";
+        }else{
+            error++;
+            errorDom.innerText = error;
+            tip.innerText=`答错啦，正确答案：${realAns}`;
+            tip.className="tip wrong";
+            punishText.innerText = getRandomPunish();
+            pop.style.display = "flex";
+        }
+    }
+    nextBtn.onclick = createQuestion;
+    input.onkeydown = e=>e.key==="Enter"&&submit.click();
+    createQuestion();
+</script>
+</body>
+</html>
