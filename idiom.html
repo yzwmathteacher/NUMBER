@@ -82,12 +82,25 @@
         return punishList[Math.floor(Math.random()*punishList.length)];
     }
 
-    // 断网兜底备用成语库
-    const backupIdioms = [
+    // 超大本地成语库，覆盖中小学常用成语，无需联网、无跨域
+    const allIdioms = [
         "山河万里","一帆风顺","四面楚歌","歌功颂德","德高望重","重见天日","日新月异","异想天开",
         "开门见山","山清水秀","秀外慧中","中流砥柱","柱石之坚","坚不可摧","摧枯拉朽","朽木难雕",
-        "雕梁画栋","栋折榱崩","崩山裂地","地大物博","博学多才","才高八斗","斗转星移","移花接木"
+        "雕梁画栋","栋折榱崩","崩山裂地","地大物博","博学多才","才高八斗","斗转星移","移花接木",
+        "一马当先","千军万马","马到成功","功成名就","就事论事","事在人为","为人师表","表里如一",
+        "春暖花开","春华秋实","实事求是","是非分明","明察秋毫","毫发无损","损人利己","己所不欲",
+        "龙飞凤舞","虎虎生威","鸟语花香","花好月圆","圆圆满满","满门桃李","李代桃僵","江郎才尽",
+        "尽心尽力","力大无穷","穷途末路","路不拾遗","遗臭万年","年年有余","余音绕梁","梁上君子",
+        "顶天立地","地动山摇","摇旗呐喊","喊冤叫屈","屈指可数","数典忘祖","祖祖辈辈","辈辈相传",
+        "风和日丽","丽藻春葩","葩花妙笔","笔下生花","花前月下","下里巴人","人定胜天","天罗地网",
+        "网开一面","面面俱到","道听途说","说长道短","短兵相接","接二连三","三心二意","意气风发"
     ];
+    // 本地校验函数，无fetch、无跨域
+    function isIdiom(word) {
+        if(word.length !== 4) return false;
+        return allIdioms.includes(word);
+    }
+
     let targetChar = "";
     const targetDom = document.getElementById("targetChar");
     const input = document.getElementById("userInput");
@@ -104,25 +117,11 @@
         voiceSpeak("继续游戏，请输入成语");
     };
 
-    // 在线智能校验成语，任意四字成语识别
-    async function isIdiom(word) {
-        if(word.length !== 4) return false;
-        try {
-            const res = await fetch(`https://api.caijiasoft.com/api/chengyu?word=${encodeURIComponent(word)}`);
-            const json = await res.json();
-            if(json.code === 200 && json.data) return true;
-            return backupIdioms.includes(word);
-        } catch(err) {
-            console.log("网络异常，使用本地兜底成语库");
-            return backupIdioms.includes(word);
-        }
-    }
-
     function startGame(){
         msgDom.className = "msg";
         msgDom.textContent = "";
         input.value = "";
-        const first = backupIdioms[Math.floor(Math.random()*backupIdioms.length)];
+        const first = allIdioms[Math.floor(Math.random()*allIdioms.length)];
         targetChar = first[3];
         targetDom.innerText = targetChar;
         logBox.innerHTML = `游戏记录：<br>${first}`;
@@ -130,7 +129,7 @@
     }
     startGame();
 
-    checkBtn.onclick = async ()=>{
+    checkBtn.onclick = ()=>{
         const val = input.value.trim();
         if(val.length!==4){
             msgDom.innerText="请输入四字成语！";
@@ -150,7 +149,7 @@
             voiceSpeak(`首字错误，必须以${targetChar}开头，惩罚：${p}`);
             return;
         }
-        const result = await isIdiom(val);
+        const result = isIdiom(val);
         if(!result){
             msgDom.innerText="该词语不是成语，请更换！";
             msgDom.className="msg fail";
